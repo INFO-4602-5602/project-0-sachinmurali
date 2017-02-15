@@ -1,10 +1,22 @@
 <html>
 <head>
 <title>Project 0</title>
-<style type="text/css" href="project0.css"></style>
+<style type="text/css" href="project0.css">
+    .axis {
+      font: 10px sans-serif;
+    }
+
+    .axis path,
+    .axis line {
+      fill: none;
+      stroke: #000;
+      shape-rendering: crispEdges;
+    }
+</style>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
 <!--Put your D3 import statement between these two lines-->
-    <script src="https://d3js.org/d3.v3.min.js"></script>
+<script src="http://d3js.org/d3.v3.js" charset="utf-8"></script>
+    <!-- <script src="https://d3js.org/d3.v3.min.js"></script> -->
 <!--Put your D3 import statement between these two lines-->
 </head>
 
@@ -34,7 +46,11 @@
     
     <script type="text/javascript">
         // Put your part one code here ***********************
+        d3.csv("data/anscombe_I.csv", function(csvData){
+            var data = csvData;
 
+            checkDataset(data);
+        });
         
         // Leave this to test your data uploading. All data uploading should be above this line
         function checkDataset(dataset) {
@@ -45,6 +61,66 @@
         }
         
         // Put your part two code here ***********************
+        var margin = {top:20, right:20, bottom:30, left:40};
+        var width = 700;
+        var height = 400;
+
+        var x = d3.scale.ordinal().rangeRoundBands([0, width], .2);
+        var y = d3.scale.linear().range([height, 0]);
+
+        d3.csv("data/anscombe_I.csv", function(csvData){
+
+            var data = csvData;
+
+            data.forEach(function(d){
+                d.x = +d.x;
+                d.y = +d.y;
+            })
+
+            data.sort(function(a, b){
+                return a.x - b.x;
+            })
+
+            var svg = d3.select("#barchart")
+                .append("svg:svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom);
+
+            var g = svg.append("g")
+                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+                
+            x.domain(data.map(function(d, i) { return i + 1; }));
+            y.domain([0, d3.max(data, function(d) { return d.x; })]);
+
+            var xAxis = d3.svg.axis()
+                .scale(x)
+                .orient("bottom");
+
+            var xAxisG = g.append('g')
+                    .attr('class', 'x axis')
+                    .attr('transform', 'translate(0, ' + height + ')')
+                    .call(xAxis);
+
+            var yAxis = d3.svg.axis()
+                      .scale(y)
+                      .orient("left")
+                      .ticks(5);
+
+            var yAxisG = g.append('g')
+                    .attr('class', 'y axis')
+                    .call(yAxis);
+
+            g.selectAll(".bar")
+             .data(data)
+             .enter().append("rect")
+             .style("fill", "steelblue")
+             .attr("class", "bar")
+             .attr("x", function(d, i) { return x(i + 1); })
+             .attr("y", function(d)    { return y(d.x); })
+             .attr("width", x.rangeBand())
+             .attr("height", function(d) { return height - y(d.x); });
+
+        });
         
         // Put your part three & four code here ***********************
         
@@ -55,3 +131,6 @@
 
 
 </html>
+
+
+
